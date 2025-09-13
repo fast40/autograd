@@ -38,8 +38,11 @@ class Number:
             self.grad = 1
 
         if self.operator == 'mul':
-            self.operands[0].grad = self.grad * self.operands[1].value
-            self.operands[1].grad = self.grad * self.operands[0].value
+            self.operands[0].grad += self.grad * self.operands[1].value
+            self.operands[1].grad += self.grad * self.operands[0].value
+        elif self.operator == 'add':
+            self.operands[0].grad += self.grad
+            self.operands[1].grad += self.grad
 
         for operand in self.operands:
             operand.backward(root=False)
@@ -56,8 +59,11 @@ if __name__ == '__main__':
 
     print(n1 * n2)
 
-    L1 = n1 * n2
-    L2 = L1 * n3
+    # L1 = n1 * n2
+    # L2 = L1 * n3
+
+    # L2 = (n1 + n2) * n3
+    L2 = (n1 + n1 + n1) * n1
     L2.backward()
     print('n1 grad (should be 6)', n1.grad)
     print('n2 grad (should be 15)', n2.grad)
