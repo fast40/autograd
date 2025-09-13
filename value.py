@@ -20,15 +20,32 @@ class Number:
     def __div__(self, other):
         return Number(self.value / other.value, operator='div', operands=[self, other])
     
-    def backward(self):
+    def backward(self, root=True):
+        # we need to know the derivative of each operator. that needs to be somewhere.
+        # ok lets just do it for mul
+
+        """
+        L = loss
+        this = this Number
+        grad = dL/dthis
+        we want dthis/doperator for operator in operators
+        then we multiply that by this.grad to get dL/dthis * dthis/do = dL/do
+        then we assign that value into the grad field of the operators
+        then we call backward on them.
+        """
+
+        if root:
+            self.grad = 1
+
         if self.operator == 'mul':
             self.operands[0].grad = self.grad * self.operands[1].value
             self.operands[1].grad = self.grad * self.operands[0].value
 
-        for operand in self.operands():
-            operands.backward()
-        print('backward pass!')
-        print('need to set the grad of everything in the past')
+        for operand in self.operands:
+            operand.backward(root=False)
+
+        # print('backward pass!')
+        # print('need to set the grad of everything in the past')
 
 
 
@@ -39,12 +56,13 @@ if __name__ == '__main__':
 
     print(n1 * n2)
 
-    L = n1 * n2
-    L2 = n1 * n3
-    L.backward()
-    print(n1.grad)
-    print(n2.grad)
-    print(L.grad)
+    L1 = n1 * n2
+    L2 = L1 * n3
+    L2.backward()
+    print('n1 grad (should be 6)', n1.grad)
+    print('n2 grad (should be 15)', n2.grad)
+    print('n3 grad (should be 10)', n3.grad)
+    print('L2 grad (should be 1 obviously)', L2.grad)
 
 
 
